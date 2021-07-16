@@ -1,4 +1,15 @@
 locals {
+  exit_command_map = {
+    "Reboot" : { command : "reboot", message : "Rebooting in 15 seconds" },
+    "Shutdown" : { command : "poweroff", message : "Powering off in 15 seconds" }
+  }
+
+  process_exit_command = var.process_exit_behavior == "None" ? "" : <<EOF
+echo "${local.exit_command_map[var.process_exit_behavior].message}" >> /var/log/spacelift/error.log
+sleep 15
+${local.exit_command_map[var.process_exit_behavior].command}
+  EOF
+
   worker_script_head = <<EOF
 #!/bin/bash
 spacelift () {(
@@ -48,10 +59,10 @@ export SPACELIFT_METADATA_vmss_name=$(curl -s -H Metadata:true --noproxy "*" "ht
 echo "Starting the Spacelift binary" >> /var/log/spacelift/info.log
 /usr/bin/spacelift-launcher 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
 )}
+
 spacelift
-echo "Powering off in 15 seconds" >> /var/log/spacelift/error.log
-sleep 15
-poweroff
+
+${local.process_exit_command}
   EOF
 
   worker_script = base64encode(

@@ -18,10 +18,9 @@ module "azure-worker" {
     export SPACELIFT_POOL_PRIVATE_KEY="${var.worker_pool_private_key}"
   EOT
 
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  subnet_id           = var.subnet_id
-  worker_pool_id      = var.worker_pool_id
+  resource_group = var.resource_group # An azurerm_resource_group object - must have `name` and `location` properties
+  subnet_id      = var.subnet_id
+  worker_pool_id = var.worker_pool_id
 }
 ```
 
