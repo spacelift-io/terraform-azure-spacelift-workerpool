@@ -44,4 +44,8 @@ More information can be found [here](https://go.microsoft.com/fwlink/?linkid=211
 The following examples of using the module are available:
 
 - [Bastion](./examples/bastion/README.md) - creates a worker with a Bastion host for ssh access.
-- [System-Assigned Identity](./examples/system-assigned-identity/README.md) - creates a worker with a system-assigned identity.
+- [System-Assigned Identity](./examples/system-assigned-identity/README.md) - creates a worker
+  with a system-assigned identity.
+- [User-Assigned Identity](./examples/user-assigned-identity/README.md) - creates a worker with
+  a user-assigned identity, and shows how to use that identity to access the worker pool credentials
+  via KeyVault secrets.
