@@ -6,9 +6,6 @@ resource "azurerm_user_assigned_identity" "vmss" {
   name                = "sp5ft-${var.worker_pool_id}"
 }
 
-data "azurerm_subscription" "primary" {
-}
-
 # Grant the VMSS instances access to our current subscription. You may want to remove this
 # and grant permissions separately, or grant more restrictive permissions.
 resource "azurerm_role_assignment" "vmss_contributor" {

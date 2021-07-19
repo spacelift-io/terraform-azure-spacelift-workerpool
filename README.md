@@ -38,3 +38,10 @@ az vm image terms accept \
 ```
 
 More information can be found [here](https://go.microsoft.com/fwlink/?linkid=2110637).
+
+## Examples
+
+The following examples of using the module are available:
+
+- [Bastion](./examples/bastion/README.md) - creates a worker with a Bastion host for ssh access.
+- [System-Assigned Identity](./examples/system-assigned-identity/README.md) - creates a worker with a system-assigned identity.
