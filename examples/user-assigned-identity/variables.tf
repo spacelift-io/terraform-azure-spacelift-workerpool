@@ -1,6 +1,4 @@
 locals {
-  namespace = "${var.application}-${var.env}"
-
   tags = {
     application = var.application
     env         = var.env
@@ -28,7 +26,8 @@ variable "env" {
 }
 
 variable "location" {
-  type = string
+  type    = string
+  default = "westeurope"
 }
 
 variable "worker_pool_config" {

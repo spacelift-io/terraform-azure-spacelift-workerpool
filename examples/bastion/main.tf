@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=2.46.0"
+      version = "=2.68.0"
     }
 
     random = {
@@ -16,6 +16,8 @@ terraform {
 provider "azurerm" {
   features {}
 }
+
+resource "random_pet" "this" {}
 
 module "azure-worker" {
   source = "../../"

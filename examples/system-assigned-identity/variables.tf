@@ -28,7 +28,8 @@ variable "env" {
 }
 
 variable "location" {
-  type = string
+  type    = string
+  default = "westeurope"
 }
 
 variable "worker_pool_config" {
