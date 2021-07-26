@@ -17,8 +17,6 @@ provider "azurerm" {
   features {}
 }
 
-resource "random_pet" "this" {}
-
 module "azure-worker" {
   source = "../../"
 
@@ -59,8 +57,4 @@ module "azure-worker" {
   worker_pool_id = var.worker_pool_id
   name_prefix    = "sp5ft-bastion"
   tags           = local.tags
-
-  depends_on = [
-    azurerm_role_assignment.vmss_contributor
-  ]
 }

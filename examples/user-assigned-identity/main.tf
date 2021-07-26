@@ -56,8 +56,4 @@ module "azure-worker" {
   worker_pool_id = var.worker_pool_id
   name_prefix    = "sp5ft-user-identity"
   tags           = local.tags
-
-  depends_on = [
-    azurerm_role_assignment.vmss_contributor
-  ]
 }
