@@ -22,7 +22,6 @@ module "azure-worker" {
 
   admin_username   = var.admin_username
   admin_public_key = var.admin_public_key
-  process_exit_behavior = "None"
 
   # This custom configuration block logs into Azure, downloads the worker pool credentials
   # from KeyVault, and then configures the environment variables the Spacelift worker will
