@@ -27,7 +27,7 @@ module "azure-worker" {
   # from KeyVault, and then configures the environment variables the Spacelift worker will
   # read them from.
   configuration = <<-EOT
-    az login --identity
+    az login --identity --allow-no-subscriptions
 
     echo "Downloading worker pool credentials from KeyVault" >> /var/log/spacelift/info.log
     az keyvault secret download --name "${azurerm_key_vault_secret.worker_pool_config.name}" \
