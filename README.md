@@ -39,6 +39,12 @@ az vm image terms accept \
 
 More information can be found [here](https://go.microsoft.com/fwlink/?linkid=2110637).
 
+## Marketplace Image
+
+The default image used by this module comes from the [spacelift-worker-image](https://github.com/spacelift-io/spacelift-worker-image)
+repository. You can find the latest image details on the [releases](https://github.com/spacelift-io/spacelift-worker-image/releases)
+page.
+
 ## Examples
 
 The following examples of using the module are available:
