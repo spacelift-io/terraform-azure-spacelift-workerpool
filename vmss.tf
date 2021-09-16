@@ -50,11 +50,11 @@ chmod 755 /usr/bin/spacelift-launcher 2>>/var/log/spacelift/error.log
 
 # Get instance metadata
 echo "Retrieving Azure VM Name" >> /var/log/spacelift/info.log
-export SPACELIFT_METADATA_vm_name=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq ".compute.name")
+export SPACELIFT_METADATA_instance_id=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq -r ".compute.name")
 echo "Retrieving Azure VM Resource ID" >> /var/log/spacelift/info.log
-export SPACELIFT_METADATA_vm_resource_id=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq ".compute.resourceId")
+export SPACELIFT_METADATA_vm_resource_id=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq -r ".compute.resourceId")
 echo "Retrieving Azure VMSS Name" >> /var/log/spacelift/info.log
-export SPACELIFT_METADATA_vmss_name=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq ".compute.vmScaleSetName")
+export SPACELIFT_METADATA_vmss_name=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq -r ".compute.vmScaleSetName")
 
 echo "Starting the Spacelift binary" >> /var/log/spacelift/info.log
 /usr/bin/spacelift-launcher 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
