@@ -8,8 +8,17 @@ NOTE: please make sure you [accept the terms](#accepting-terms) for our Azure Ma
 image before trying to use the module.
 
 ```hcl
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/azurerm"
+      version = "~> 2.68.0"
+    }
+  }
+}
+
 module "azure-worker" {
-  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool"
+  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=5e8c191c30c217e909414d52842fe2729dc9e1ac"
 
   admin_password = "Super Secret Password!"
 
