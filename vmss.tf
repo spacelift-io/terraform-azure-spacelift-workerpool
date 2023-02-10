@@ -102,9 +102,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
   location            = var.resource_group.location
   sku                 = var.vmss_sku
 
-  instances      = var.vmss_instances
-  admin_username = var.admin_username
-  admin_password = var.admin_password
+  instances                       = var.vmss_instances
+  admin_username                  = var.admin_username
+  admin_password                  = var.admin_password
+  disable_password_authentication = var.admin_password == null
 
   dynamic "admin_ssh_key" {
     for_each = var.admin_public_key != null ? [0] : []
