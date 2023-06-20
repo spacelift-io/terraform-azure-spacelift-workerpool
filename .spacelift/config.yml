@@ -1,6 +1,9 @@
 version: 1
-module_version: 0.0.6
+module_version: 0.0.7
 
 tests:
   - name: System-assigned identity
     project_root: examples/system-assigned-identity
+
+  - name: Password authentication
+    project_root: examples/password-authentication
