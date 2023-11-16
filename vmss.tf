@@ -49,7 +49,7 @@ echo "Verifying checksum signature..." >> /var/log/spacelift/info.log
 gpg --verify spacelift-launcher_SHA256SUMS.sig 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
 retStatus=$?
 if [ $retStatus -eq 0 ]; then
-    echo "OK\!" >> /var/log/spacelift/info.log
+    echo "OK!" >> /var/log/spacelift/info.log
 else
     return $retStatus
 fi
@@ -58,7 +58,7 @@ rm spacelift-launcher_SHA256SUMS spacelift-launcher_SHA256SUMS.sig
 LAUNCHER_SHA=$(sha256sum /usr/bin/spacelift-launcher | cut -f 1 -d ' ')
 echo "Verifying launcher binary..." >> /var/log/spacelift/info.log
 if [[ "$CHECKSUM" == "$LAUNCHER_SHA" ]]; then
-  echo "OK\!" >> /var/log/spacelift/info.log
+  echo "OK!" >> /var/log/spacelift/info.log
 else
   echo "Checksum and launcher binary hash did not match" >> /var/log/spacelift/error.log
   return 1
