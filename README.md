@@ -10,15 +10,15 @@ image before trying to use the module.
 ```hcl
 terraform {
   required_providers {
-    google = {
+    azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 2.68.0"
+      version = "=3.61.0"
     }
   }
 }
 
 module "azure-worker" {
-  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v0.0.6"
+  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v0.1.0"
 
   admin_password = "Super Secret Password!"
 
