@@ -14,6 +14,9 @@ ${local.exit_command_map[var.process_exit_behavior].command}
 #!/bin/bash
 spacelift () {(
 set -e
+
+# Ensure the Spacelift log directory exists in case it hasn't been provisioned on the VM image
+mkdir -p /var/log/spacelift
   EOF
 
   worker_script_tail = <<EOF
