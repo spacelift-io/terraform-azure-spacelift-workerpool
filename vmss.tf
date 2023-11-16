@@ -32,8 +32,11 @@ binaryURL=$(printf "%s-%s" "$baseURL" "$currentArch")
 shaSumURL=$(printf "%s-%s_%s" "$baseURL" "$currentArch" "SHA256SUMS")
 shaSumSigURL=$(printf "%s-%s_%s" "$baseURL" "$currentArch" "SHA256SUMS.sig")
 
-echo "Updating packages" >> /var/log/spacelift/info.log
-unattended-upgrade -d 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
+if [[ "${var.perform_unattended_upgrade_on_boot}" == "true" ]]; then
+  echo "Updating packages" >> /var/log/spacelift/info.log
+  apt-get update 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
+  unattended-upgrade -d 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
+fi
 
 echo "Downloading Spacelift launcher" >> /var/log/spacelift/info.log
 curl "$binaryURL" --output /usr/bin/spacelift-launcher 2>>/var/log/spacelift/error.log
