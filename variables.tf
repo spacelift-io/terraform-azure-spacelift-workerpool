@@ -132,6 +132,12 @@ variable "process_exit_behavior" {
   }
 }
 
+variable "perform_unattended_upgrade_on_boot" {
+  type        = bool
+  description = "Indicates whether unattended-upgrade should be run on startup to ensure the latest security updates are installed. Defaults to true."
+  default     = true
+}
+
 locals {
   namespace = "${var.name_prefix}-${var.worker_pool_id}"
 }
