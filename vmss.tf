@@ -168,7 +168,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
 
   custom_data = base64encode(local.user_data)
 
-  scale_in_policy = "OldestVM"
+  scale_in {
+    rule = "OldestVM"
+  }
 
   tags = merge(var.tags,
     {
