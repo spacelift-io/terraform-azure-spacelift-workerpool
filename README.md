@@ -33,6 +33,18 @@ module "azure-worker" {
 }
 ```
 
+## Debugging
+
+The workers VM instances are designed to reboot when the launcher process exits by default. This allows them to recover from certain types of errors and reconnect to Spacelift.
+
+However this can cause a crash-loop situation, for example if there is some kind of configuration error that prevents the launcher connecting to Spacelift correctly. When this happens, it can be difficult to connect to the VM to investigate the problem.
+
+Because of this, the module supports a `process_exit_behavior` variable that can be set to one of the following values:
+
+- `Reboot` - causes the instance to restart (the default behavior).
+- `Shutdown` - causes the instance to shutdown.
+- `None` - takes no action, allowing you to connect to the instance and investigate issues.
+
 ## Accepting Terms
 
 Before you can use our Marketplace image, you need to accept the terms and conditions for the
