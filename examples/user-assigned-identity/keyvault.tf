@@ -46,7 +46,7 @@ resource "azurerm_key_vault" "this" {
 
 resource "azurerm_key_vault_secret" "worker_pool_config" {
   name         = "worker-pool-config"
-  value        = base64encode(var.worker_pool_config)
+  value        = var.worker_pool_config
   key_vault_id = azurerm_key_vault.this.id
 }
 

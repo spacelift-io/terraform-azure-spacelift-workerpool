@@ -38,8 +38,8 @@ module "azure-worker" {
       --vault-name "${azurerm_key_vault.this.name}" \
       --file "/tmp/worker-pool-private-key" 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
 
-    export SPACELIFT_TOKEN=$(cat /tmp/worker-pool-config | base64 --decode)
-    export SPACELIFT_POOL_PRIVATE_KEY=$(cat /tmp/worker-pool-private-key | base64 --decode)
+    export SPACELIFT_TOKEN=$(cat /tmp/worker-pool-config)
+    export SPACELIFT_POOL_PRIVATE_KEY=$(cat /tmp/worker-pool-private-key)
 
     rm /tmp/worker-pool-config
     rm /tmp/worker-pool-private-key
