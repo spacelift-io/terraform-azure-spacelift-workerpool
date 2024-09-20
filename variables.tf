@@ -67,31 +67,31 @@ variable "resource_group" {
 variable "source_image_id" {
   type        = string
   description = "The VM image to use. Either source_image_id, or a combination of source_image_publisher, source_image_offer, source_image_sku, and source_image_version must be specified."
-  default     = null
+  default     = "/communityGalleries/spacelift-40913cda-9bf9-4bcb-bf90-78fd83f30079/images/spacelift_worker_image/versions/latest"
 }
 
 variable "source_image_publisher" {
   type        = string
   description = "The image publisher to use. Either source_image_id, or a combination of source_image_publisher, source_image_offer, source_image_sku, and source_image_version must be specified."
-  default     = "spaceliftinc1625499025476"
+  default     = null
 }
 
 variable "source_image_offer" {
   type        = string
   description = "The image offer to use. Either source_image_id, or a combination of source_image_publisher, source_image_offer, source_image_sku, and source_image_version must be specified."
-  default     = "spacelift_worker"
+  default     = null
 }
 
 variable "source_image_sku" {
   type        = string
   description = "The image SKU to use. Either source_image_id, or a combination of source_image_publisher, source_image_offer, source_image_sku, and source_image_version must be specified."
-  default     = "ubuntu_20_04"
+  default     = null
 }
 
 variable "source_image_version" {
   type        = string
   description = "The image version to use. Either source_image_id, or a combination of source_image_publisher, source_image_offer, source_image_sku, and source_image_version must be specified."
-  default     = "latest"
+  default     = null
 }
 
 variable "subnet_id" {
