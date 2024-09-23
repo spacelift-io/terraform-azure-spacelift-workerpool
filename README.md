@@ -4,9 +4,6 @@ Terraform module for deploying a Spacelift worker pool on Azure using a VMSS.
 
 ## Usage
 
-NOTE: please make sure you [accept the terms](#accepting-terms) for our Azure Marketplace
-image before trying to use the module.
-
 ```hcl
 terraform {
   required_providers {
@@ -18,7 +15,7 @@ terraform {
 }
 
 module "azure-worker" {
-  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v0.1.0"
+  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v1.0.0"
 
   admin_password = "Super Secret Password!"
 
