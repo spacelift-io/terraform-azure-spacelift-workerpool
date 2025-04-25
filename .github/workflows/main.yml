@@ -1,0 +1,11 @@
+name: "Terraform GitHub Actions"
+
+on:
+  pull_request:
+    paths:
+      - "*.tf"
+
+jobs:
+  main:
+    uses: mediwareinc/github-actions/.github/workflows/terraform-core.yml@0.11.0
+    secrets: inherit
