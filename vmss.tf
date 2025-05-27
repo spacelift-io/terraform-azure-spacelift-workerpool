@@ -175,9 +175,5 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
     rule = "OldestVM"
   }
 
-  tags = merge(var.tags,
-    {
-      WorkerPoolID : var.worker_pool_id
-    }
-  )
+  tags = var.tags
 }
