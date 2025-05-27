@@ -103,7 +103,7 @@ chmod 744 /var/lib/cloud/scripts/per-boot/spacelift-boot.sh
 }
 
 resource "azurerm_linux_virtual_machine_scale_set" "this" {
-  name                = local.namespace
+  name                = var.name_prefix
   resource_group_name = var.resource_group.name
   location            = var.resource_group.location
   sku                 = var.vmss_sku

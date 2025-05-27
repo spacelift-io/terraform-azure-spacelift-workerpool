@@ -138,6 +138,6 @@ variable "perform_unattended_upgrade_on_boot" {
   default     = true
 }
 
-locals {
-  namespace = "${var.name_prefix}-${var.worker_pool_id}"
-}
+# locals {
+#   namespace = "${var.name_prefix}-${var.worker_pool_id}"
+# }
