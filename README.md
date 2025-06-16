@@ -57,6 +57,25 @@ az vm image terms accept \
 
 More information can be found [here](https://go.microsoft.com/fwlink/?linkid=2110637).
 
+If using Terraform to accept the terms and conditions, the module needs an explicit dependency to ensure the resources are created in the proper order:
+
+```hcl
+resource "azurerm_marketplace_agreement" "spacelift_worker" {
+  publisher = "spaceliftinc1625499025476"
+  offer     = "spacelift_worker"
+  plan      = "ubuntu_20_04"
+}
+
+module "azure-worker" {
+  source     = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v0.1.0"
+  depends_on = [ azurerm_marketplace_agreement.spacelift_worker ]
+
+  [...]
+}
+```
+
+More information can be found [here](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/marketplace_agreement.html).
+
 ## Marketplace Image
 
 The default image used by this module comes from the [spacelift-worker-image](https://github.com/spacelift-io/spacelift-worker-image)
