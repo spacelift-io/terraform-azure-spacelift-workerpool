@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.61.0"
+      version = "=4.42.0"
     }
 
     random = {
@@ -15,6 +15,7 @@ terraform {
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
   features {}
+  resource_provider_registrations = "none"
 }
 
 module "azure-worker" {
