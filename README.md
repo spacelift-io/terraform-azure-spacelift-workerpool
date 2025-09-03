@@ -15,7 +15,7 @@ terraform {
 }
 
 module "azure-worker" {
-  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v1.1.0"
+  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v1.1.1"
 
   admin_password = "Super Secret Password!"
 
