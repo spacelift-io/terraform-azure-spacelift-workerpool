@@ -88,6 +88,13 @@ echo "Retrieving Azure VMSS Name" >> /var/log/spacelift/info.log
 export SPACELIFT_METADATA_vmss_name=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq -r ".compute.vmScaleSetName")
 
 echo "Starting the Spacelift binary" >> /var/log/spacelift/info.log
+
+# Set FIPS 140 compliance for fedRAMP environments
+if [[ -n "$fedrampSuffix" ]]; then
+  echo "Setting GODEBUG=fips140=only for fedRAMP compliance" >> /var/log/spacelift/info.log
+  export GODEBUG=fips140=only
+fi
+
 /usr/bin/spacelift-launcher 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
 )}
 
