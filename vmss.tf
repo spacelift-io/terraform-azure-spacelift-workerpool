@@ -89,7 +89,6 @@ export SPACELIFT_METADATA_vmss_name=$(curl -s -H Metadata:true --noproxy "*" "ht
 
 echo "Starting the Spacelift binary" >> /var/log/spacelift/info.log
 
-# Set FIPS 140 compliance for fedRAMP environments
 if [[ -n "$fedrampSuffix" ]]; then
   echo "Setting GODEBUG=fips140=only for fedRAMP compliance" >> /var/log/spacelift/info.log
   export GODEBUG=fips140=only
