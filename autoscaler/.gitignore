@@ -1,0 +1,38 @@
+# Binaries
+autoscaler
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binaries
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Deployment package
+deploy.zip
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Azure Functions
+local.settings.json
+.python_packages/
+.venv/
+__pycache__/

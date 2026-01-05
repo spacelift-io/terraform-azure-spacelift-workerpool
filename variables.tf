@@ -60,6 +60,7 @@ variable "resource_group" {
   type = object({
     name     = string
     location = string
+    id       = string
   })
   description = "The resource group to deploy the scale set to."
 }
@@ -136,6 +137,58 @@ variable "perform_unattended_upgrade_on_boot" {
   type        = bool
   description = "Indicates whether unattended-upgrade should be run on startup to ensure the latest security updates are installed. Defaults to true."
   default     = true
+}
+
+variable "autoscaling_enabled" {
+  type        = bool
+  description = "Whether to enable autoscaling for the worker pool using an Azure Function."
+  default     = false
+}
+
+variable "autoscaling_configuration" {
+  type = object({
+    schedule_expression = optional(string, "0 */5 * * * *") # Every 5 minutes (cron format)
+    max_create          = optional(number, 1)               # Maximum instances to create per run
+    max_terminate       = optional(number, 1)               # Maximum instances to terminate per run
+    scale_down_delay    = optional(number, 5)               # Minutes a worker must be registered before eligible for termination
+    timeout             = optional(number, 300)             # Function timeout in seconds
+    min_idle_workers    = optional(number, 0)               # Minimum number of idle workers to maintain
+  })
+  description = "Configuration for the autoscaler Azure Function. Only used when autoscaling_enabled is true."
+  default = {
+    schedule_expression = "0 */5 * * * *"
+    max_create          = 1
+    max_terminate       = 1
+    scale_down_delay    = 5
+    timeout             = 300
+    min_idle_workers    = 0
+  }
+}
+
+variable "spacelift_api_key_id" {
+  type        = string
+  description = "Spacelift API key ID for the autoscaler. Required when autoscaling_enabled is true."
+  default     = null
+  sensitive   = true
+}
+
+variable "spacelift_api_key_secret" {
+  type        = string
+  description = "Spacelift API key secret for the autoscaler. Required when autoscaling_enabled is true."
+  default     = null
+  sensitive   = true
+}
+
+variable "spacelift_api_endpoint" {
+  type        = string
+  description = "Spacelift API endpoint for the autoscaler."
+  default     = "https://spacelift.io"
+}
+
+variable "autoscaler_subnet_id" {
+  type        = string
+  description = "The subnet ID for the autoscaler Azure Function. If not provided, defaults to the worker pool subnet."
+  default     = null
 }
 
 locals {
