@@ -54,7 +54,7 @@ module "spacelift_worker_pool" {
   EOT
 
   # VMSS configuration
-  vmss_instances = 0 # Initial capacity
+  vmss_instances = 2 # Initial capacity
   vmss_sku       = "Standard_B2s"
 
   # Enable autoscaling
@@ -63,25 +63,25 @@ module "spacelift_worker_pool" {
   # Autoscaling configuration
   autoscaling_configuration = {
     schedule_expression = "0 */5 * * * *" # Every 5 minutes
-    max_create          = 2               # Scale up by max 2 instances per cycle
+    max_create          = 5               # Scale up by max 5 instances per cycle
     max_terminate       = 2               # Scale down by max 2 instances per cycle
     scale_down_delay    = 5               # Wait 5 minutes before scaling down new instances
     timeout             = 300             # Function timeout in seconds
-    min_idle_workers    = 0               # Maintain at least 1 idle worker
+    min_idle_workers    = 2               # Maintain at least 2 idle workers
   }
 
   # Spacelift API credentials for autoscaler
   spacelift_api_key_id     = var.spacelift_api_key_id
   spacelift_api_key_secret = var.spacelift_api_key_secret
-  spacelift_api_endpoint   = "https://my-first-env.app.spacelift.io"
+  spacelift_api_endpoint   = "https://<your-spacelift-account>.app.spacelift.io"
 
   # Tags
   tags = {
     Environment = "example"
     Purpose     = "autoscaling-demo"
     # Add capacity constraints as tags for the autoscaler
-    MinCapacity = "0"
-    MaxCapacity = "2"
+    MinCapacity = "2"
+    MaxCapacity = "5"
   }
 }
 
