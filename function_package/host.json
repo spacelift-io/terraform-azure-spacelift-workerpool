@@ -1,0 +1,30 @@
+{
+  "version": "2.0",
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
+    "version": "[4.*, 5.0.0)"
+  },
+  "logging": {
+    "logLevel": {
+      "default": "Information",
+      "Host.Results": "Information",
+      "Function": "Information",
+      "Host.Aggregator": "Information"
+    },
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "maxTelemetryItemsPerSecond": 5
+      }
+    }
+  },
+  "customHandler": {
+    "description": {
+      "defaultExecutablePath": "bootstrap",
+      "workingDirectory": "",
+      "arguments": []
+    },
+    "enableForwardingHttpRequest": false
+  },
+  "functionTimeout": "00:05:00"
+}

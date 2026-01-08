@@ -147,21 +147,69 @@ variable "autoscaling_enabled" {
 
 variable "autoscaling_configuration" {
   type = object({
-    schedule_expression = optional(string, "0 */5 * * * *") # Every 5 minutes (cron format)
-    max_create          = optional(number, 1)               # Maximum instances to create per run
-    max_terminate       = optional(number, 1)               # Maximum instances to terminate per run
-    scale_down_delay    = optional(number, 5)               # Minutes a worker must be registered before eligible for termination
-    timeout             = optional(number, 300)             # Function timeout in seconds
-    min_idle_workers    = optional(number, 0)               # Minimum number of idle workers to maintain
+    # Scheduling
+    schedule_expression = optional(string, "0 */5 * * * *") # Every 5 minutes (Azure cron format: second minute hour day month weekday)
+
+    # Scaling limits
+    max_create       = optional(number, 1) # Maximum instances to create per run
+    max_terminate    = optional(number, 1) # Maximum instances to terminate per run
+    scale_down_delay = optional(number, 0) # Minutes a worker must be registered before eligible for termination
+
+    # Capacity sanity check
+    capacity_sanity_check = optional(number, 10) # Maximum capacity to prevent runaway scaling
+
+    # Function timeout
+    timeout = optional(number, 300) # Function timeout in seconds
+
+    # Key Vault configuration
+    key_vault_id = optional(string, null) # Existing Key Vault ID to use (if null, creates new one)
+
+    # Binary source configuration
+    binary_source = optional(string, "local") # Source of autoscaler binary: "local" or "download"
+
+    # Download configuration (for future use)
+    binary_download_url = optional(string, null)     # URL to download autoscaler binary from
+    binary_version      = optional(string, null)     # Version of binary to download
+    binary_architecture = optional(string, "x86_64") # Architecture: x86_64 or arm64
   })
-  description = "Configuration for the autoscaler Azure Function. Only used when autoscaling_enabled is true."
+  description = <<-EOT
+    Configuration for the autoscaler Azure Function using the company-approved bootstrap binary.
+
+    The binary auto-detects Azure VMSS based on the resource ID format and uses managed identity for authentication.
+
+    Binary source options:
+    - "local": Use the committed bootstrap binary (default, for testing)
+    - "download": Download from URL (future implementation, similar to AWS module)
+
+    Only used when autoscaling_enabled is true.
+  EOT
   default = {
-    schedule_expression = "0 */5 * * * *"
-    max_create          = 1
-    max_terminate       = 1
-    scale_down_delay    = 5
-    timeout             = 300
-    min_idle_workers    = 0
+    schedule_expression   = "0 */5 * * * *"
+    max_create            = 1
+    max_terminate         = 1
+    scale_down_delay      = 0
+    capacity_sanity_check = 10
+    timeout               = 300
+    key_vault_id          = null
+    binary_source         = "local"
+    binary_download_url   = null
+    binary_version        = null
+    binary_architecture   = "x86_64"
+  }
+
+  validation {
+    condition     = var.autoscaling_configuration.binary_source == "local" || var.autoscaling_configuration.binary_source == "download"
+    error_message = "binary_source must be either 'local' or 'download'."
+  }
+
+  validation {
+    condition     = var.autoscaling_configuration.binary_source != "download" || var.autoscaling_configuration.binary_download_url != null
+    error_message = "binary_download_url must be provided when binary_source is 'download'."
+  }
+
+  validation {
+    condition     = contains(["x86_64", "arm64"], var.autoscaling_configuration.binary_architecture)
+    error_message = "binary_architecture must be either 'x86_64' or 'arm64'."
   }
 }
 
