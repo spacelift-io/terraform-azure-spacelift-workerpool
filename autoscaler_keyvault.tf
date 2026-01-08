@@ -8,7 +8,7 @@ data "azurerm_client_config" "current" {}
 resource "azurerm_key_vault" "autoscaler" {
   count = var.autoscaling_enabled && var.autoscaling_configuration.key_vault_id == null ? 1 : 0
 
-  name                = "${local.namespace}-kv"
+  name                = lower(substr("${local.namespace}-kv", 0, 24))
   resource_group_name = var.resource_group.name
   location            = var.resource_group.location
   tenant_id           = data.azurerm_client_config.current.tenant_id
@@ -62,7 +62,8 @@ resource "azurerm_key_vault_secret" "spacelift_api_key" {
   })
 
   depends_on = [
-    azurerm_key_vault.autoscaler
+    azurerm_key_vault.autoscaler,
+    azurerm_key_vault_access_policy.deployer
   ]
 }
 
@@ -82,6 +83,18 @@ resource "azurerm_key_vault_access_policy" "deployer" {
     "Delete",
     "Purge",
     "Recover"
+  ]
+}
+
+resource "azurerm_key_vault_access_policy" "autoscaler" {
+  count = var.autoscaling_enabled && var.autoscaling_configuration.key_vault_id == null ? 1 : 0
+
+  key_vault_id = azurerm_key_vault.autoscaler[0].id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_linux_function_app.autoscaler[0].identity[0].principal_id
+
+  secret_permissions = [
+    "Get",
   ]
 }
 

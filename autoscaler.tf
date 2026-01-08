@@ -28,7 +28,7 @@ resource "null_resource" "package_autoscaler" {
 resource "azurerm_storage_account" "autoscaler" {
   count = var.autoscaling_enabled ? 1 : 0
 
-  name                     = substr(replace("${local.namespace}autoscaler", "-", ""), 0, 24)
+  name                     = lower(substr(replace("${local.namespace}autoscaler", "-", ""), 0, 24))
   resource_group_name      = var.resource_group.name
   location                 = var.resource_group.location
   account_tier             = "Standard"
@@ -89,7 +89,7 @@ resource "azurerm_service_plan" "autoscaler" {
   resource_group_name = var.resource_group.name
   location            = var.resource_group.location
   os_type             = "Linux"
-  sku_name            = "B1"
+  sku_name            = "S1"
 
   tags = merge(var.tags, {
     WorkerPoolID = var.worker_pool_id
@@ -115,27 +115,26 @@ resource "azurerm_linux_function_app" "autoscaler" {
   }
 
   site_config {
-    # Custom runtime for the Go binary
     application_stack {
       use_custom_runtime = true
     }
 
-    # Enable application insights for monitoring
     application_insights_connection_string = azurerm_application_insights.autoscaler[0].connection_string
+    application_insights_key               = azurerm_application_insights.autoscaler[0].instrumentation_key
 
-    # Prevent multiple concurrent executions
-    application_insights_key = azurerm_application_insights.autoscaler[0].instrumentation_key
+    cors {
+      allowed_origins = ["https://portal.azure.com"]
+    }
   }
-
-  # Function package URL
-  zip_deploy_file = var.autoscaling_configuration.binary_source == "local" ? "${azurerm_storage_blob.autoscaler[0].url}${data.azurerm_storage_account_blob_container_sas.autoscaler[0].sas}" : null
 
   app_settings = {
     # Azure Function runtime settings
-    FUNCTIONS_WORKER_RUNTIME        = "custom"
-    WEBSITE_RUN_FROM_PACKAGE        = var.autoscaling_configuration.binary_source == "local" ? "1" : "0"
-    AzureWebJobsDisableHomepage     = "true"
-    WEBSITE_ENABLE_SYNC_UPDATE_SITE = "true"
+    FUNCTIONS_WORKER_RUNTIME = "custom"
+    # Run from the package in blob storage
+    WEBSITE_RUN_FROM_PACKAGE                  = var.autoscaling_configuration.binary_source == "local" ? "${azurerm_storage_blob.autoscaler[0].url}${data.azurerm_storage_account_blob_container_sas.autoscaler[0].sas}" : "0"
+    AzureWebJobsDisableHomepage               = "true"
+    WEBSITE_ENABLE_SYNC_UPDATE_SITE           = "true"
+    WEBSITE_MAX_DYNAMIC_APPLICATION_SCALE_OUT = "1"
 
     # Timer trigger schedule (cron format for Azure Functions)
     SCHEDULE_EXPRESSION = var.autoscaling_configuration.schedule_expression
@@ -155,9 +154,6 @@ resource "azurerm_linux_function_app" "autoscaler" {
     AUTOSCALING_MAX_KILL              = var.autoscaling_configuration.max_terminate
     AUTOSCALING_SCALE_DOWN_DELAY      = var.autoscaling_configuration.scale_down_delay
     AUTOSCALING_CAPACITY_SANITY_CHECK = var.autoscaling_configuration.capacity_sanity_check
-
-    # Azure credentials via managed identity
-    AZURE_CLIENT_ID = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.spacelift_api_key[0].versionless_id})"
   }
 
   tags = merge(var.tags, {
@@ -167,8 +163,8 @@ resource "azurerm_linux_function_app" "autoscaler" {
 
   lifecycle {
     precondition {
-      condition     = !var.autoscaling_enabled || (var.spacelift_api_key_id != null && var.spacelift_api_key_secret != null)
-      error_message = "When autoscaling_enabled is true, both spacelift_api_key_id and spacelift_api_key_secret must be provided."
+      condition     = !var.autoscaling_enabled || (var.spacelift_api_key_id != null && var.spacelift_api_key_secret != null && var.spacelift_api_endpoint != null)
+      error_message = "When autoscaling_enabled is true, spacelift_api_key_id, spacelift_api_key_secret, and spacelift_api_endpoint must be provided."
     }
 
     precondition {

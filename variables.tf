@@ -142,7 +142,7 @@ variable "perform_unattended_upgrade_on_boot" {
 variable "autoscaling_enabled" {
   type        = bool
   description = "Whether to enable autoscaling for the worker pool using an Azure Function."
-  default     = false
+  default     = true
 }
 
 variable "autoscaling_configuration" {
@@ -229,13 +229,7 @@ variable "spacelift_api_key_secret" {
 
 variable "spacelift_api_endpoint" {
   type        = string
-  description = "Spacelift API endpoint for the autoscaler."
-  default     = "https://spacelift.io"
-}
-
-variable "autoscaler_subnet_id" {
-  type        = string
-  description = "The subnet ID for the autoscaler Azure Function. If not provided, defaults to the worker pool subnet."
+  description = "Spacelift API endpoint for the autoscaler (e.g., https://myaccount.app.spacelift.io). Required when autoscaling_enabled is true."
   default     = null
 }
 
