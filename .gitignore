@@ -30,3 +30,8 @@ override.tf.json
 
 .terraform.lock.hcl
 local.tfvars
+
+# Autoscaler downloaded/generated files
+01*
+ec2-workerpool-autoscaler_*.zip
+autoscaler-function.zip
