@@ -158,8 +158,8 @@ resource "azurerm_linux_function_app" "autoscaler" {
     AUTOSCALING_MAX_KILL         = var.autoscaling_configuration.max_terminate != null ? var.autoscaling_configuration.max_terminate : 1
     AUTOSCALING_SCALE_DOWN_DELAY = var.autoscaling_configuration.scale_down_delay != null ? var.autoscaling_configuration.scale_down_delay : 0
 
-    AZURE_AUTOSCALING_MIN_SIZE = coalesce(var.autoscaling_configuration.scale.min, -1)
-    AZURE_AUTOSCALING_MAX_SIZE = coalesce(var.autoscaling_configuration.scale.max, 5)
+    AZURE_AUTOSCALING_MIN_SIZE = coalesce(try(var.autoscaling_configuration.scale.min, null), -1)
+    AZURE_AUTOSCALING_MAX_SIZE = coalesce(try(var.autoscaling_configuration.scale.max, null), 5)
   }
 
   tags = merge(var.tags, {

@@ -122,7 +122,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
   location            = var.resource_group.location
   sku                 = var.vmss_sku
 
-  instances                       = coalesce(var.autoscaling_configuration.scale.min, var.non_autoscaled_vmss_instances, 2)
+  instances                       = coalesce(try(var.autoscaling_configuration.scale.min, null), var.non_autoscaled_vmss_instances, 2)
   admin_username                  = var.admin_username
   admin_password                  = var.admin_password
   disable_password_authentication = var.admin_password == null
