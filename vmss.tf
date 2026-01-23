@@ -79,13 +79,14 @@ fi
 echo "Making the Spacelift launcher executable" >> /var/log/spacelift/info.log
 chmod 755 /usr/bin/spacelift-launcher 2>>/var/log/spacelift/error.log
 
-# Get instance metadata
-echo "Retrieving Azure VM Name" >> /var/log/spacelift/info.log
-export SPACELIFT_METADATA_instance_id=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq -r ".compute.name")
-echo "Retrieving Azure VM Resource ID" >> /var/log/spacelift/info.log
-export SPACELIFT_METADATA_vm_resource_id=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq -r ".compute.resourceId")
-echo "Retrieving Azure VMSS Name" >> /var/log/spacelift/info.log
-export SPACELIFT_METADATA_vmss_name=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq -r ".compute.vmScaleSetName")
+# Get instance metadata from Azure IMDS
+echo "Retrieving Azure instance metadata" >> /var/log/spacelift/info.log
+IMDS_RESPONSE=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01")
+VM_NAME=$(echo "$IMDS_RESPONSE" | jq -r ".compute.name")
+export SPACELIFT_METADATA_instance_id=$(echo "$VM_NAME" | grep -oE '[0-9]+$')
+export SPACELIFT_METADATA_vm_resource_id=$(echo "$IMDS_RESPONSE" | jq -r ".compute.resourceId")
+export SPACELIFT_METADATA_vmss_name=$(echo "$IMDS_RESPONSE" | jq -r ".compute.vmScaleSetName")
+export SPACELIFT_METADATA_asg_id=$(echo "$IMDS_RESPONSE" | jq -r ".compute.vmScaleSetName")
 
 echo "Starting the Spacelift binary" >> /var/log/spacelift/info.log
 /usr/bin/spacelift-launcher 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
@@ -121,7 +122,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
   location            = var.resource_group.location
   sku                 = var.vmss_sku
 
-  instances                       = var.vmss_instances
+  instances                       = coalesce(try(var.autoscaling_configuration.scale.min, null), var.non_autoscaled_vmss_instances, 2)
   admin_username                  = var.admin_username
   admin_password                  = var.admin_password
   disable_password_authentication = var.admin_password == null

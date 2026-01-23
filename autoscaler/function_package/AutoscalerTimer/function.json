@@ -1,0 +1,11 @@
+{
+  "bindings": [
+    {
+      "name": "Timer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "%SCHEDULE_EXPRESSION%",
+      "useMonitor": true
+    }
+  ]
+}

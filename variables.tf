@@ -60,6 +60,7 @@ variable "resource_group" {
   type = object({
     name     = string
     location = string
+    id       = string
   })
   description = "The resource group to deploy the scale set to."
 }
@@ -105,7 +106,7 @@ variable "tags" {
   default     = {}
 }
 
-variable "vmss_instances" {
+variable "non_autoscaled_vmss_instances" {
   type        = number
   description = "The number of VM instances to create."
   default     = 2
@@ -138,6 +139,53 @@ variable "perform_unattended_upgrade_on_boot" {
   default     = true
 }
 
+variable "autoscaling_configuration" {
+  description = <<EOF
+  Configuration for the autoscaler Azure Function. If null, the autoscaler will not be deployed. Configuration options are:
+  - version: (optional) Version of the autoscaler to deploy (e.g., "v2.2.0"). Defaults to "latest".
+  - architecture: (optional) Instruction set architecture of the autoscaler. Can be "amd64" or "arm64". Defaults to "amd64".
+  - schedule_expression: (optional) Azure Functions cron expression for autoscaler scheduling. Default: "0 */5 * * * *" (every 5 minutes).
+  - max_create: (optional) Maximum number of instances the autoscaler can create in a single run. Default: 1.
+  - max_terminate: (optional) Maximum number of instances the autoscaler can terminate in a single run. Default: 1.
+  - timeout: (optional) Timeout in seconds for a single autoscaling run. Default: 300.
+  - key_vault_id: (optional) Existing Key Vault ID to use for storing secrets. If null, a new Key Vault will be created.
+  - scale_down_delay: (optional) Minutes a worker must be registered before eligible for termination. Default: 0.
+  EOF
+
+  type = object({
+    version             = optional(string)
+    architecture        = optional(string)
+    schedule_expression = optional(string)
+    max_create          = optional(number)
+    max_terminate       = optional(number)
+    timeout             = optional(number)
+    key_vault_id        = optional(string)
+    scale_down_delay    = optional(number)
+    scale = optional(object({
+      min = number
+      max = number
+    }))
+  })
+  default = null
+}
+
+variable "spacelift_api_credentials" {
+  description = <<EOF
+  Spacelift API credentials for the autoscaler. Required when autoscaling_configuration is provided.
+  - api_key_id: (mandatory) The ID of the Spacelift API key.
+  - api_key_secret: (mandatory) The secret corresponding to the Spacelift API key.
+  - api_key_endpoint: (mandatory) The full URL of the Spacelift API endpoint. Example: https://mycorp.app.spacelift.io
+  EOF
+  sensitive   = true
+  type = object({
+    api_key_id       = string
+    api_key_secret   = string
+    api_key_endpoint = string
+  })
+  default = null
+}
+
 locals {
-  namespace = "${var.name_prefix}-${var.worker_pool_id}"
+  namespace           = "${var.name_prefix}-${var.worker_pool_id}"
+  autoscaling_enabled = var.autoscaling_configuration != null
 }
