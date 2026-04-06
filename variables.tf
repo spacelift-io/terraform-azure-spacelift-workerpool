@@ -112,6 +112,16 @@ variable "non_autoscaled_vmss_instances" {
   default     = 2
 }
 
+variable "os_disk_storage_account_type" {
+  type        = string
+  description = "The storage account type for the OS disk. Standard_LRS (HDD) is being retired by Azure on September 8, 2028."
+  default     = "StandardSSD_LRS"
+  validation {
+    condition     = contains(["Standard_LRS", "StandardSSD_LRS", "Premium_LRS", "StandardSSD_ZRS", "Premium_ZRS"], var.os_disk_storage_account_type)
+    error_message = "The os_disk_storage_account_type must be one of: Standard_LRS, StandardSSD_LRS, Premium_LRS, StandardSSD_ZRS, Premium_ZRS."
+  }
+}
+
 variable "vmss_sku" {
   type        = string
   description = "The VM SKU to use for the VMSS instances."
