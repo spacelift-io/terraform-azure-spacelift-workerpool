@@ -158,7 +158,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = var.os_disk_storage_account_type
   }
 
   network_interface {
