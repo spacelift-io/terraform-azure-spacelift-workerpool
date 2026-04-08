@@ -9,24 +9,39 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.61.0"
+      version = "=4.42.0"
     }
   }
 }
 
 module "azure-worker" {
-  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v1.1.1"
+  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v2.1.0"
 
-  admin_password = "Super Secret Password!"
+  admin_public_key = var.admin_public_key
 
   configuration = <<-EOT
-    export SPACELIFT_TOKEN="${var.worker_pool_config}"
-    export SPACELIFT_POOL_PRIVATE_KEY="${var.worker_pool_private_key}"
+    export SPACELIFT_TOKEN=${var.worker_pool_config}
+    export SPACELIFT_POOL_PRIVATE_KEY=${var.worker_pool_private_key}
   EOT
 
-  resource_group = var.resource_group # An azurerm_resource_group object - must have `name` and `location` properties
+  resource_group = var.resource_group
   subnet_id      = var.subnet_id
   worker_pool_id = var.worker_pool_id
+
+  autoscaling_configuration = {
+    max_create    = 2
+    max_terminate = 1
+    scale = {
+      min = 1
+      max = 5
+    }
+  }
+
+  spacelift_api_credentials = {
+    api_key_id       = var.spacelift_api_key_id
+    api_key_secret   = var.spacelift_api_key_secret
+    api_key_endpoint = var.spacelift_api_key_endpoint
+  }
 }
 ```
 
@@ -69,6 +84,8 @@ This module automatically uses the FedRAMP worker image for FedRAMP worker pools
 
 The following examples of using the module are available:
 
+- [Autoscaler](./examples/autoscaler/README.md) - creates a worker with the autoscaler enabled,
+  using an Azure Function to automatically scale the VMSS based on queue depth.
 - [Bastion](./examples/bastion/README.md) - creates a worker with a Bastion host for ssh access.
 - [System-Assigned Identity](./examples/system-assigned-identity/README.md) - creates a worker
   with a system-assigned identity.
