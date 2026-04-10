@@ -34,7 +34,7 @@ if [[ -n "$SPACELIFT_TOKEN" ]]; then
   decoded_token=$(echo "$SPACELIFT_TOKEN" | base64 -d 2>/dev/null || echo "")
   if [[ -n "$decoded_token" ]]; then
     broker_endpoint=$(echo "$decoded_token" | jq -r '.broker.endpoint' 2>/dev/null || echo "")
-    if [[ "$broker_endpoint" == *".fedramp.spacelift.io" ]]; then
+    if [[ "$broker_endpoint" == *".fedramp.spacelift.io" ]] || [[ "$broker_endpoint" == *".fedramp.spacelift.dev" ]]; then
       fedrampSuffix="-fedramp"
     fi
   fi
