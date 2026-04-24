@@ -10,9 +10,11 @@ sleep 15
 ${local.exit_command_map[var.process_exit_behavior].command}
   EOF
 
+  systemd_stop_post = var.process_exit_behavior == "None" ? "" : "ExecStopPost=+/bin/sh -c 'sleep 15 && ${local.exit_command_map[var.process_exit_behavior].command}'"
+
   worker_script_head = <<EOF
 #!/bin/bash
-spacelift () {(
+spacelift() {
 set -e
 
 # Ensure the Spacelift log directory exists in case it hasn't been provisioned on the VM image
@@ -88,13 +90,39 @@ export SPACELIFT_METADATA_vm_resource_id=$(echo "$IMDS_RESPONSE" | jq -r ".compu
 export SPACELIFT_METADATA_vmss_name=$(echo "$IMDS_RESPONSE" | jq -r ".compute.vmScaleSetName")
 export SPACELIFT_METADATA_asg_id=$(echo "$IMDS_RESPONSE" | jq -r ".compute.vmScaleSetName")
 
-echo "Starting the Spacelift binary" >> /var/log/spacelift/info.log
-/usr/bin/spacelift-launcher 1>>/var/log/spacelift/info.log 2>>/var/log/spacelift/error.log
-)}
+# Write environment file for the systemd service.
+# Dump the full environment so the launcher inherits everything exported above,
+# including vars set via var.configuration (e.g. SPACELIFT_TOKEN, HTTP_PROXY).
+mkdir -p /etc/spacelift
+env > /etc/spacelift/env
+chmod 600 /etc/spacelift/env
 
-spacelift
+cat > /etc/systemd/system/spacelift-launcher.service <<UNIT
+[Unit]
+Description=Spacelift Launcher
+After=network-online.target docker.service
+Wants=network-online.target
 
-${local.process_exit_command}
+[Service]
+Type=simple
+EnvironmentFile=/etc/spacelift/env
+ExecStart=/usr/bin/spacelift-launcher
+${local.systemd_stop_post}
+KillMode=control-group
+TimeoutStopSec=30
+StandardOutput=append:/var/log/spacelift/info.log
+StandardError=append:/var/log/spacelift/error.log
+Restart=no
+UNIT
+
+systemctl daemon-reload
+systemctl restart spacelift-launcher
+echo "Spacelift launcher started as systemd service" >> /var/log/spacelift/info.log
+}
+
+if ! spacelift; then
+  ${local.process_exit_command}
+fi
   EOF
 
   worker_script = base64encode(
