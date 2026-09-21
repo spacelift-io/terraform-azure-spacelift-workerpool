@@ -69,11 +69,10 @@ resource "azurerm_storage_container" "autoscaler" {
 }
 
 resource "azurerm_storage_blob" "autoscaler" {
-  name                   = "autoscaler-function-${data.local_file.function_package.content_base64sha256}.zip"
-  storage_account_name   = azurerm_storage_account.autoscaler.name
-  storage_container_name = azurerm_storage_container.autoscaler.name
-  type                   = "Block"
-  source                 = local.generated_package_zip
+  name                 = "autoscaler-function-${data.local_file.function_package.content_base64sha256}.zip"
+  storage_container_id = azurerm_storage_container.autoscaler.id
+  type                 = "Block"
+  source               = local.generated_package_zip
 
   depends_on = [null_resource.package]
 }

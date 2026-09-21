@@ -9,7 +9,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=4.42.0"
+      version = "~> 5.0"
     }
   }
 }
@@ -44,6 +44,14 @@ module "azure-worker" {
   }
 }
 ```
+
+## Resource Provider Registration
+
+AzureRM v5 does not register Azure Resource Providers automatically. Ensure the
+Resource Providers required by your configuration are registered before applying
+this module, or configure `resource_providers_to_register` in the `azurerm`
+provider block. Enabling the autoscaler requires additional providers for
+Storage, App Service, Application Insights, Key Vault, and role assignments.
 
 ## Debugging
 
