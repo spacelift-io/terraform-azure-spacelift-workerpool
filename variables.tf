@@ -125,7 +125,7 @@ variable "os_disk_storage_account_type" {
 variable "vmss_sku" {
   type        = string
   description = "The VM SKU to use for the VMSS instances."
-  default     = "Standard_B2S"
+  default     = "Standard_D2ads_v6"
 }
 
 variable "worker_pool_id" {
