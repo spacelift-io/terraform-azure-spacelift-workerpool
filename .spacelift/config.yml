@@ -1,14 +1,18 @@
 version: 1
-module_version: 3.0.0
+module_version: 4.0.0
 
 tests:
-  - name: System-assigned identity
-    project_root: examples/system-assigned-identity
-
   - name: Autoscaler
     project_root: examples/autoscaler
 
-  # This test case is currently disabled because the destroy is failing when trying to delete
-  # the KeyVault. It looks like it may be related to this issue: https://github.com/hashicorp/terraform-provider-azurerm/issues/19322
-  # - name: Password authentication
-  #   project_root: examples/password-authentication
+  - name: Bastion
+    project_root: examples/bastion
+
+  - name: Password authentication
+    project_root: examples/password-authentication
+
+  - name: System-assigned identity
+    project_root: examples/system-assigned-identity
+
+  - name: User-assigned identity
+    project_root: examples/user-assigned-identity
