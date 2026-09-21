@@ -7,8 +7,6 @@ tests:
 
   - name: Bastion
     project_root: examples/bastion
-    environment:
-      TF_VAR_admin_private_key: ZHVtbXktcHJpdmF0ZS1rZXk=
 
   - name: Password authentication
     project_root: examples/password-authentication
