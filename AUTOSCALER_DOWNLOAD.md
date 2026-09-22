@@ -22,7 +22,7 @@ autoscaling_configuration = {
 
 Supported values are:
 
-- `stable` (default): uses the release pinned by this module.
+- `stable` (default): uses v3.0.2, the release pinned by this module.
 - `latest`: resolves the latest GitHub release to a concrete tag during the
   Terraform run.
 - A release tag such as `v3.0.0`: deploys that exact release.
