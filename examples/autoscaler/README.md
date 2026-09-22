@@ -46,7 +46,7 @@ The `autoscaling_configuration` block in `main.tf` controls the autoscaler behav
 | `scale.min`         | —              | Minimum number of VMSS instances                                 |
 | `scale.max`         | `5`            | Maximum number of VMSS instances                                 |
 | `schedule_expression` | `0 */5 * * * *` | Azure Functions cron expression for how often the autoscaler runs |
-| `version`           | `latest`       | Version of the autoscaler binary to deploy                       |
+| `version`           | `stable`       | Release tag, `stable` module pin, or dynamically resolved `latest` |
 | `architecture`      | `amd64`        | Instruction set architecture (`amd64` or `arm64`)                |
 | `key_vault_id`      | `null`         | Existing Key Vault ID (creates a new one if null)                |
 | `scale_down_delay`  | `0`            | Minutes a worker must be registered before eligible for termination |
