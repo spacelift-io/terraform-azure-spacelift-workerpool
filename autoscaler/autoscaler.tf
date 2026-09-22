@@ -4,7 +4,7 @@ locals {
 
   autoscaler_zip            = "${local.download_folder}/ec2-workerpool-autoscaler_azurefunc_linux_${local.architecture}.zip"
   resolve_latest            = var.autoscaling_configuration.version == "latest"
-  stable_autoscaler_version = "v3.0.0"
+  stable_autoscaler_version = "v3.0.2"
   autoscaler_version        = var.autoscaling_configuration.version == "stable" ? local.stable_autoscaler_version : (local.resolve_latest ? jsondecode(data.http.latest_release[0].response_body).tag_name : var.autoscaling_configuration.version)
   function_name             = "${var.base_name}-vmss-autoscaler"
 
