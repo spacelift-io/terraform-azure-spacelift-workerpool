@@ -2,6 +2,15 @@
 
 Terraform module for deploying a Spacelift worker pool on Azure using a VMSS.
 
+## Requirements
+
+Module v4 requires AzureRM provider v5 and is not compatible with AzureRM v4.
+Use module v3.0.0 if you need to remain on AzureRM v4.
+
+The default VMSS size is `Standard_D2ads_v5`. Ensure the target subscription and
+region have sufficient Standard DADSv5 Family and Total Regional vCPU quota, or
+set `vmss_sku` to another image-compatible size.
+
 ## Usage
 
 ```hcl
@@ -9,13 +18,13 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=4.42.0"
+      version = "~> 5.0"
     }
   }
 }
 
 module "azure-worker" {
-  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v2.1.0"
+  source = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v4.0.0"
 
   admin_public_key = var.admin_public_key
 
@@ -44,6 +53,28 @@ module "azure-worker" {
   }
 }
 ```
+
+## Resource Provider Registration
+
+AzureRM v5 does not register Azure Resource Providers automatically. Ensure the
+Resource Providers required by your configuration are registered before applying
+this module, or configure `resource_providers_to_register` in the `azurerm`
+provider block. Enabling the autoscaler requires additional providers for
+Storage, App Service, Application Insights, Key Vault, and role assignments.
+
+## Autoscaler Release
+
+The autoscaler defaults to `version = "stable"`, currently pinned to v3.0.2.
+You can instead provide an explicit release tag or use `version = "latest"` to
+resolve the latest GitHub release to a concrete tag during the Terraform run.
+
+When using `latest`, set `GITHUB_TOKEN` in the Terraform runner environment to
+avoid the lower unauthenticated GitHub API rate limit. The resolved version,
+architecture, and packaging files determine a stable package hash, so plans do
+not drift while the resolved release remains unchanged.
+
+See [Autoscaler Release Download](./AUTOSCALER_DOWNLOAD.md) for version options,
+deployment flow, and runner requirements.
 
 ## Debugging
 
@@ -82,7 +113,7 @@ resource "azurerm_marketplace_agreement" "spacelift_worker" {
 }
 
 module "azure-worker" {
-  source     = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v0.1.0"
+  source     = "github.com/spacelift-io/terraform-azure-spacelift-workerpool?ref=v4.0.0"
   depends_on = [ azurerm_marketplace_agreement.spacelift_worker ]
 
   [...]

@@ -125,7 +125,7 @@ variable "os_disk_storage_account_type" {
 variable "vmss_sku" {
   type        = string
   description = "The VM SKU to use for the VMSS instances."
-  default     = "Standard_B2S"
+  default     = "Standard_D2ads_v5"
 }
 
 variable "worker_pool_id" {
@@ -152,7 +152,7 @@ variable "perform_unattended_upgrade_on_boot" {
 variable "autoscaling_configuration" {
   description = <<EOF
   Configuration for the autoscaler Azure Function. If null, the autoscaler will not be deployed. Configuration options are:
-  - version: (optional) Version of the autoscaler to deploy (e.g., "v2.2.0"). Defaults to "latest".
+  - version: (optional) Version of the autoscaler to deploy (e.g., "v3.0.0"). Defaults to "stable", which is pinned by this module. Set to "latest" to resolve the newest release through the GitHub API.
   - architecture: (optional) Instruction set architecture of the autoscaler. Can be "amd64" or "arm64". Defaults to "amd64".
   - schedule_expression: (optional) Azure Functions cron expression for autoscaler scheduling. Default: "0 */5 * * * *" (every 5 minutes).
   - max_create: (optional) Maximum number of instances the autoscaler can create in a single run. Default: 1.
@@ -163,7 +163,7 @@ variable "autoscaling_configuration" {
   EOF
 
   type = object({
-    version             = optional(string)
+    version             = optional(string, "stable")
     architecture        = optional(string)
     schedule_expression = optional(string)
     max_create          = optional(number)
@@ -177,6 +177,16 @@ variable "autoscaling_configuration" {
     }))
   })
   default = null
+
+  validation {
+    condition     = var.autoscaling_configuration == null || try(contains(["stable", "latest"], var.autoscaling_configuration.version) || startswith(var.autoscaling_configuration.version, "v"), false)
+    error_message = "version must be a release tag starting with \"v\" (for example, \"v3.0.0\"), \"stable\", or \"latest\"."
+  }
+
+  validation {
+    condition     = var.autoscaling_configuration == null || try(contains(["amd64", "arm64"], coalesce(var.autoscaling_configuration.architecture, "amd64")), false)
+    error_message = "architecture must be either \"amd64\" or \"arm64\"."
+  }
 }
 
 variable "spacelift_api_credentials" {

@@ -8,11 +8,12 @@ data "azurerm_client_config" "current" {}
 resource "azurerm_key_vault" "autoscaler" {
   count = var.key_vault_id == null ? 1 : 0
 
-  name                = lower(substr("${var.base_name}-kv", 0, 24))
-  resource_group_name = var.resource_group.name
-  location            = var.resource_group.location
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  sku_name            = "standard"
+  name                       = lower(substr("${var.base_name}-kv", 0, 24))
+  resource_group_name        = var.resource_group.name
+  location                   = var.resource_group.location
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  rbac_authorization_enabled = false
 
   # Enable purge protection to prevent accidental deletion
   purge_protection_enabled = true

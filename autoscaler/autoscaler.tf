@@ -2,28 +2,73 @@ locals {
   download_folder = var.worker_pool_id
   architecture    = coalesce(var.autoscaling_configuration.architecture, "amd64")
 
-  # TODO:// might need to rename this after repo name changes
-  autoscaler_zip     = "${local.download_folder}/ec2-workerpool-autoscaler_azurefunc_linux_${local.architecture}.zip"
-  autoscaler_version = coalesce(var.autoscaling_configuration.version, "latest")
-  function_name      = "${var.base_name}-vmss-autoscaler"
+  autoscaler_zip            = "${local.download_folder}/ec2-workerpool-autoscaler_azurefunc_linux_${local.architecture}.zip"
+  resolve_latest            = var.autoscaling_configuration.version == "latest"
+  stable_autoscaler_version = "v3.0.2"
+  autoscaler_version        = var.autoscaling_configuration.version == "stable" ? local.stable_autoscaler_version : (local.resolve_latest ? jsondecode(data.http.latest_release[0].response_body).tag_name : var.autoscaling_configuration.version)
+  function_name             = "${var.base_name}-vmss-autoscaler"
 
   function_package_dir  = "${path.module}/function_package"
   generated_package_zip = "${local.download_folder}/autoscaler-function.zip"
+  package_hash = sha256(jsonencode({
+    version        = local.autoscaler_version
+    architecture   = local.architecture
+    package_script = filesha256("${local.function_package_dir}/package.sh")
+    host_json      = filesha256("${local.function_package_dir}/host.json")
+    function_json  = filesha256("${local.function_package_dir}/AutoscalerTimer/function.json")
+  }))
 }
 
-# Download the autoscaler binary from GitHub releases
+# Resolve "latest" to a concrete release tag to avoid perpetual plan drift.
+data "http" "latest_release" {
+  count = local.resolve_latest ? 1 : 0
+  url   = "https://api.github.com/repos/spacelift-io/ec2-workerpool-autoscaler/releases/latest"
+
+  request_headers = merge(
+    { Accept = "application/vnd.github+json" },
+    local.github_auth_header,
+  )
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Failed to fetch the latest autoscaler release (HTTP ${self.status_code}). Set GITHUB_TOKEN to avoid rate limits or pin a specific version."
+    }
+  }
+}
+
+# Read GITHUB_TOKEN from the environment to authenticate GitHub API requests.
+data "external" "github_auth_header" {
+  count = local.resolve_latest ? 1 : 0
+  program = [
+    "sh", "-c",
+    <<-EOT
+      if [ -n "$GITHUB_TOKEN" ]; then
+        printf '{"Authorization":"Bearer %s"}' "$GITHUB_TOKEN"
+      else
+        printf '{}'
+      fi
+    EOT
+  ]
+}
+
+locals {
+  github_auth_header = local.resolve_latest ? data.external.github_auth_header[0].result : {}
+}
+
+# Download the concrete autoscaler release during apply.
 resource "null_resource" "download" {
   triggers = {
-    # Always re-download if version is "latest" or if the file doesn't exist
-    keeper = (
-      local.autoscaler_version == "latest" || !fileexists(local.autoscaler_zip)
-      ? timestamp()
-      : local.autoscaler_version
-    )
+    version      = local.autoscaler_version
+    architecture = local.architecture
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/download.sh ${local.autoscaler_version} ${local.architecture} ${local.download_folder}"
+    command = <<-EOT
+      mkdir -p "${local.download_folder}"
+      curl -sfL -o "${local.autoscaler_zip}" \
+        "https://github.com/spacelift-io/ec2-workerpool-autoscaler/releases/download/${local.autoscaler_version}/ec2-workerpool-autoscaler_azurefunc_linux_${local.architecture}.zip"
+    EOT
   }
 }
 
@@ -31,20 +76,12 @@ resource "null_resource" "package" {
   depends_on = [null_resource.download]
 
   triggers = {
-    download_trigger = null_resource.download.id
-    script_hash      = filesha256("${local.function_package_dir}/package.sh")
-    host_json_hash   = filesha256("${local.function_package_dir}/host.json")
-    function_hash    = filesha256("${local.function_package_dir}/AutoscalerTimer/function.json")
+    package_hash = local.package_hash
   }
 
   provisioner "local-exec" {
     command = "${local.function_package_dir}/package.sh ${local.autoscaler_zip} ${local.generated_package_zip}"
   }
-}
-
-data "local_file" "function_package" {
-  depends_on = [null_resource.package]
-  filename   = local.generated_package_zip
 }
 
 # Storage account for the Function App
@@ -69,11 +106,10 @@ resource "azurerm_storage_container" "autoscaler" {
 }
 
 resource "azurerm_storage_blob" "autoscaler" {
-  name                   = "autoscaler-function-${data.local_file.function_package.content_base64sha256}.zip"
-  storage_account_name   = azurerm_storage_account.autoscaler.name
-  storage_container_name = azurerm_storage_container.autoscaler.name
-  type                   = "Block"
-  source                 = local.generated_package_zip
+  name                 = "autoscaler-function-${local.package_hash}.zip"
+  storage_container_id = azurerm_storage_container.autoscaler.id
+  type                 = "Block"
+  source               = local.generated_package_zip
 
   depends_on = [null_resource.package]
 }
