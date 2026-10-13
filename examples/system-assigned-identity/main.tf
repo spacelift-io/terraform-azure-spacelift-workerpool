@@ -29,6 +29,8 @@ module "azure-worker" {
     export SPACELIFT_POOL_PRIVATE_KEY=${var.worker_pool_private_key}
   EOT
 
+  worker_comms_url = "https://app.spacelift.io"
+
   resource_group = azurerm_resource_group.this
   subnet_id      = azurerm_subnet.worker.id
 

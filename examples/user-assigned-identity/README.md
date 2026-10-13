@@ -39,8 +39,9 @@ terraform apply -var-file myvars.tfvars
 
 ## Worker Communication
 
-Workers in this example use the module's default HTTP long-poll transport and only need outbound
-HTTPS access to `https://app.spacelift.io`. For US-region SaaS, set `domain_name = "us.spacelift.io"`;
-for self-hosted or FedRAMP Spacelift, set `worker_comms_url`. See the
+Workers in this example use the module's default HTTP long-poll transport, which requires
+`worker_comms_url` to be set. The example uses `https://app.spacelift.io` (EU SaaS) and only needs
+outbound HTTPS access to that host. For US-region SaaS, use `https://app.us.spacelift.io`; for
+self-hosted or FedRAMP Spacelift, use the base URL provided for your environment. See the
 [HTTP long-poll example](../http-long-poll/README.md) for details, including how to temporarily
 fall back to MQTT with `worker_comms_protocol = "mqtt"`.

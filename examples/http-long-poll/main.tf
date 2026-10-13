@@ -55,22 +55,18 @@ module "azure-worker" {
   name_prefix    = "sp5ft-http-long-poll"
   tags           = local.tags
 
-  # HTTP long-polling is the default transport, so no worker communication
-  # inputs are needed for the EU SaaS environment. The module exports:
+  # HTTP long-polling is the default transport. worker_comms_url is required
+  # when the protocol is "poll" and the plan fails without it. The module exports:
   #
   #   SPACELIFT_WORKER_COMMS_PROTOCOL=poll
-  #   SPACELIFT_WORKER_COMMS_URL=https://app.spacelift.io
+  #   SPACELIFT_WORKER_COMMS_URL=<worker_comms_url>
   #
-  # For US-region SaaS, uncomment the following line so the URL becomes
-  # https://app.us.spacelift.io:
-  #
-  # domain_name = "us.spacelift.io"
-  #
-  # For self-hosted or FedRAMP Spacelift, set the server base URL explicitly:
-  #
-  # worker_comms_url = "https://spacelift.example.com"
-  #
-  # To temporarily remain on the deprecated MQTT transport during migration:
+  # Use https://app.us.spacelift.io for US-region SaaS, or the base URL of
+  # your self-hosted or FedRAMP Spacelift server.
+  worker_comms_url = "https://app.spacelift.io"
+
+  # To temporarily remain on the deprecated MQTT transport during migration,
+  # set the protocol to "mqtt"; worker_comms_url is then ignored.
   #
   # worker_comms_protocol = "mqtt"
 }

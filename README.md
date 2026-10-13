@@ -33,6 +33,8 @@ module "azure-worker" {
     export SPACELIFT_POOL_PRIVATE_KEY=${var.worker_pool_private_key}
   EOT
 
+  worker_comms_url = "https://app.spacelift.io"
+
   resource_group = var.resource_group
   subnet_id      = var.subnet_id
   worker_pool_id = var.worker_pool_id
@@ -56,9 +58,9 @@ module "azure-worker" {
 
 ## Worker Communication
 
-Starting with v5.0.0, workers use HTTP long-polling by default. The module exports `SPACELIFT_WORKER_COMMS_PROTOCOL=poll` and uses `https://app.spacelift.io` as the default server URL. This replaces the deprecated MQTT transport and means workers only need outbound HTTPS access to the Spacelift server for worker communication.
+Starting with v5.0.0, workers use HTTP long-polling by default. The module exports `SPACELIFT_WORKER_COMMS_PROTOCOL=poll` and `SPACELIFT_WORKER_COMMS_URL` to the launcher. This replaces the deprecated MQTT transport and means workers only need outbound HTTPS access to the Spacelift server for worker communication.
 
-For US-region SaaS, set `domain_name = "us.spacelift.io"`; the default communication URL then becomes `https://app.us.spacelift.io`. Self-hosted and FedRAMP deployments must set `worker_comms_url` to the base URL provided for their Spacelift environment.
+When the protocol is `poll`, `worker_comms_url` is **required** and the plan fails if it is not set. Use `https://app.spacelift.io` for EU SaaS, `https://app.us.spacelift.io` for US SaaS, or the base URL provided for your self-hosted or FedRAMP Spacelift environment.
 
 This default change is **breaking** because existing worker pools switch transports on their next VM replacement or reboot. Ensure outbound HTTPS access to the communication URL before upgrading. To temporarily remain on MQTT during migration, set `worker_comms_protocol = "mqtt"`. See the [v4.x to v5.0 upgrade guide](./docs/upgrade/v4.x-to-v5.0.md) for details.
 
@@ -149,6 +151,8 @@ The following examples of using the module are available:
 - [Bastion](./examples/bastion/README.md) - creates a worker with a Bastion host for ssh access.
 - [HTTP Long-Poll](./examples/http-long-poll/README.md) - creates a worker using the default
   HTTP long-poll transport, and shows how to point it at US-region, self-hosted, or FedRAMP Spacelift.
+- [HTTP Long-Poll Missing URL](./examples/http-long-poll-missing-url/README.md) - a negative test
+  that confirms the module refuses to plan when `worker_comms_url` is not set for the `poll` protocol.
 - [System-Assigned Identity](./examples/system-assigned-identity/README.md) - creates a worker
   with a system-assigned identity.
 - [User-Assigned Identity](./examples/user-assigned-identity/README.md) - creates a worker with

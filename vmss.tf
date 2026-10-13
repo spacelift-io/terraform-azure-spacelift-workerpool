@@ -1,5 +1,7 @@
 locals {
-  worker_comms_url = var.worker_comms_url == null ? "https://app.${var.domain_name}" : var.worker_comms_url
+  # Null-safe so a missing URL surfaces as the VMSS precondition error below
+  # rather than a template interpolation error here.
+  worker_comms_url = var.worker_comms_url == null ? "" : var.worker_comms_url
   worker_comms_configuration = join("\n", compact([
     "export SPACELIFT_WORKER_COMMS_PROTOCOL=\"${var.worker_comms_protocol}\"",
     var.worker_comms_protocol == "poll" ? "export SPACELIFT_WORKER_COMMS_URL=\"${local.worker_comms_url}\"" : null,
@@ -222,6 +224,13 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
 
   scale_in {
     rule = "OldestVM"
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.worker_comms_protocol != "poll" || var.worker_comms_url != null
+      error_message = "worker_comms_url must be set when worker_comms_protocol is \"poll\". Use https://app.spacelift.io for EU SaaS, https://app.us.spacelift.io for US SaaS, or the base URL of your self-hosted or FedRAMP Spacelift server."
+    }
   }
 
   tags = merge(var.tags,

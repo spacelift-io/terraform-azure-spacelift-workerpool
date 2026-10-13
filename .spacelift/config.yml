@@ -11,6 +11,10 @@ tests:
   - name: HTTP long-poll
     project_root: examples/http-long-poll
 
+  - name: HTTP long-poll missing URL
+    project_root: examples/http-long-poll-missing-url
+    negative: true
+
   - name: Password authentication
     project_root: examples/password-authentication
 
