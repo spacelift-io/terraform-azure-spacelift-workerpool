@@ -54,6 +54,16 @@ module "azure-worker" {
 }
 ```
 
+## Worker Communication
+
+Starting with v5.0.0, workers use HTTP long-polling by default. The module exports `SPACELIFT_WORKER_COMMS_PROTOCOL=poll` and uses `https://app.spacelift.io` as the default server URL. This replaces the deprecated MQTT transport and means workers only need outbound HTTPS access to the Spacelift server for worker communication.
+
+For US-region SaaS, set `domain_name = "us.spacelift.io"`; the default communication URL then becomes `https://app.us.spacelift.io`. Self-hosted and FedRAMP deployments must set `worker_comms_url` to the base URL provided for their Spacelift environment.
+
+This default change is **breaking** because existing worker pools switch transports on their next VM replacement or reboot. Ensure outbound HTTPS access to the communication URL before upgrading. To temporarily remain on MQTT during migration, set `worker_comms_protocol = "mqtt"`. See the [v4.x to v5.0 upgrade guide](./docs/upgrade/v4.x-to-v5.0.md) for details.
+
+The module exports these values before `configuration` runs, so values in `configuration` can still override them, but using `worker_comms_protocol` and `worker_comms_url` is recommended.
+
 ## Resource Provider Registration
 
 AzureRM v5 does not register Azure Resource Providers automatically. Ensure the
@@ -137,6 +147,8 @@ The following examples of using the module are available:
 - [Autoscaler](./examples/autoscaler/README.md) - creates a worker with the autoscaler enabled,
   using an Azure Function to automatically scale the VMSS based on queue depth.
 - [Bastion](./examples/bastion/README.md) - creates a worker with a Bastion host for ssh access.
+- [HTTP Long-Poll](./examples/http-long-poll/README.md) - creates a worker using the default
+  HTTP long-poll transport, and shows how to point it at US-region, self-hosted, or FedRAMP Spacelift.
 - [System-Assigned Identity](./examples/system-assigned-identity/README.md) - creates a worker
   with a system-assigned identity.
 - [User-Assigned Identity](./examples/user-assigned-identity/README.md) - creates a worker with

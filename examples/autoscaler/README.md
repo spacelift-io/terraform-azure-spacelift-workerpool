@@ -50,3 +50,11 @@ The `autoscaling_configuration` block in `main.tf` controls the autoscaler behav
 | `architecture`      | `amd64`        | Instruction set architecture (`amd64` or `arm64`)                |
 | `key_vault_id`      | `null`         | Existing Key Vault ID (creates a new one if null)                |
 | `scale_down_delay`  | `0`            | Minutes a worker must be registered before eligible for termination |
+
+## Worker Communication
+
+Workers in this example use the module's default HTTP long-poll transport and only need outbound
+HTTPS access to `https://app.spacelift.io`. For US-region SaaS, set `domain_name = "us.spacelift.io"`;
+for self-hosted or FedRAMP Spacelift, set `worker_comms_url`. See the
+[HTTP long-poll example](../http-long-poll/README.md) for details, including how to temporarily
+fall back to MQTT with `worker_comms_protocol = "mqtt"`.

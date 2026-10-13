@@ -1,4 +1,10 @@
 locals {
+  worker_comms_url = var.worker_comms_url == null ? "https://app.${var.domain_name}" : var.worker_comms_url
+  worker_comms_configuration = join("\n", compact([
+    "export SPACELIFT_WORKER_COMMS_PROTOCOL=\"${var.worker_comms_protocol}\"",
+    var.worker_comms_protocol == "poll" ? "export SPACELIFT_WORKER_COMMS_URL=\"${local.worker_comms_url}\"" : null,
+  ]))
+
   exit_command_map = {
     "Reboot" : { command : "reboot", message : "Rebooting in 15 seconds" },
     "Shutdown" : { command : "poweroff", message : "Powering off in 15 seconds" }
@@ -128,6 +134,7 @@ fi
   worker_script = base64encode(
     join("\n", [
       local.worker_script_head,
+      local.worker_comms_configuration,
       var.configuration,
       local.worker_script_tail,
     ])
