@@ -62,7 +62,7 @@ Starting with v5.0.0, workers use HTTP long-polling by default. The module expor
 
 When the protocol is `poll`, `worker_comms_url` is **required** and the plan fails if it is not set. Use `https://app.spacelift.io` for EU SaaS, `https://app.us.spacelift.io` for US SaaS, or the base URL provided for your self-hosted or FedRAMP Spacelift environment.
 
-This default change is **breaking** because existing worker pools switch transports on their next VM replacement or reboot. Ensure outbound HTTPS access to the communication URL before upgrading. To temporarily remain on MQTT during migration, set `worker_comms_protocol = "mqtt"`. See the [v4.x to v5.0 upgrade guide](./docs/upgrade/v4.x-to-v5.0.md) for details.
+This default change is **breaking** because existing worker pools switch transports on their next VM replacement. Ensure outbound HTTPS access to the communication URL before upgrading. To temporarily remain on MQTT during migration, set `worker_comms_protocol = "mqtt"`. See the [v4.x to v5.0 upgrade guide](./docs/upgrade/v4.x-to-v5.0.md) for details.
 
 The module exports these values before `configuration` runs, so values in `configuration` can still override them, but using `worker_comms_protocol` and `worker_comms_url` is recommended.
 
