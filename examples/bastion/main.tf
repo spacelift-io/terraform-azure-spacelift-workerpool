@@ -48,6 +48,8 @@ module "azure-worker" {
     echo "Worker pool credentials configured" >> /var/log/spacelift/info.log
   EOT
 
+  worker_comms_url = "https://app.spacelift.io"
+
   resource_group                 = azurerm_resource_group.this
   subnet_id                      = azurerm_subnet.worker.id
   application_security_group_ids = [azurerm_application_security_group.linux.id]
