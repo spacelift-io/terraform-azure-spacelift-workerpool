@@ -12,15 +12,16 @@ locals {
     "Shutdown" : { command : "poweroff", message : "Powering off in 15 seconds" }
   }
 
-  process_exit_command = var.process_exit_behavior == "None" ? "" : <<EOF
+  process_exit_command = var.process_exit_behavior == "None" ? "" : replace(<<EOF
 echo "${local.exit_command_map[var.process_exit_behavior].message}" >> /var/log/spacelift/error.log
 sleep 15
 ${local.exit_command_map[var.process_exit_behavior].command}
   EOF
+  , "\r\n", "\n")
 
   systemd_stop_post = var.process_exit_behavior == "None" ? "" : "ExecStopPost=+/bin/sh -c 'sleep 15 && ${local.exit_command_map[var.process_exit_behavior].command}'"
 
-  worker_script_head = <<EOF
+  worker_script_head = replace(<<EOF
 #!/bin/bash
 spacelift() {
 set -e
@@ -28,8 +29,9 @@ set -e
 # Ensure the Spacelift log directory exists in case it hasn't been provisioned on the VM image
 mkdir -p /var/log/spacelift
   EOF
+  , "\r\n", "\n")
 
-  worker_script_tail = <<EOF
+  worker_script_tail = replace(<<EOF
 currentArch=$(uname -m)
 
 if [[ "$currentArch" != "x86_64" && "$currentArch" != "aarch64" ]]; then
@@ -132,17 +134,18 @@ if ! spacelift; then
   ${local.process_exit_command}
 fi
   EOF
+  , "\r\n", "\n")
 
   worker_script = base64encode(
     join("\n", [
       local.worker_script_head,
       local.worker_comms_configuration,
-      var.configuration,
+      replace(var.configuration, "\r\n", "\n"),
       local.worker_script_tail,
     ])
   )
 
-  user_data = <<EOF
+  user_data = replace(<<EOF
 #!/bin/bash
 
 # Write the launcher script out to a file in the `per-boot` folder to ensure it restarts if the VM is rebooted
@@ -151,6 +154,7 @@ chmod 744 /var/lib/cloud/scripts/per-boot/spacelift-boot.sh
 
 /var/lib/cloud/scripts/per-boot/spacelift-boot.sh
   EOF
+  , "\r\n", "\n")
 }
 
 resource "azurerm_linux_virtual_machine_scale_set" "this" {
