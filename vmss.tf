@@ -220,7 +220,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
     }
   }
 
-  custom_data = base64encode(local.user_data)
+  custom_data = base64encode(replace(local.user_data, "\r\n", "\n"))
 
   scale_in {
     rule = "OldestVM"
